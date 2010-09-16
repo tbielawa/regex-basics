@@ -1,0 +1,231 @@
+<?xml version="1.0" encoding="utf-8"?>
+<book xmlns="http://docbook.org/ns/docbook"
+      version="5.0"
+      xml:id="Regex">
+
+  <!-- You may also enjoy these name spaces -->
+  <!-- To store your DocBook document in multiple pages,
+       use the XInclude namespace:
+       
+       xmlns:xi="http://www.w3.org/2001/XInclude"
+  -->
+  <!-- If you wish to make links elsewhere, use the XLink ns:
+       
+       xmlns:xl="http://www.w3.org/1999/xlink"
+  -->
+
+  <!-- Begin Meta Info Section -->
+
+  <info>
+    <title>Regular Expressions</title>
+
+    <!--    
+    <subtitle></subtitle>
+    -->
+
+    <date>09/15/10</date>
+    
+    <authorgroup>
+      <author>
+	<personname>
+	  <firstname>Andrew</firstname>
+	  <othername>Butcher</othername>
+	  <surname></surname>
+	</personname>
+	<email>abutcher@afrolegs.com</email>
+      </author>
+    </authorgroup>
+
+  </info>
+
+  <!-- Begin Book Contents -->
+
+  <chapter>
+    <title>Some Examples</title>
+
+    <section>
+      <title>Simple Character Classes</title>
+      <para>
+	Brackets denote a character class.  Simply surrounding your
+	class with brackets will match your input once.  Supplying a +
+	will signify that your class will be repeated one or more
+	times.
+      </para>
+    
+    <screen>
+[a]		Just a, once.
+
+[a-z]+	     	Any lower case letter one or more times.
+
+[a-zA-Z]+	Any upper or lower case letter one or more times.
+
+[a-zA-Z0-9]+	Any upper or lowercase letters or numbers one or more times.</screen>
+    </section>
+
+    <section>
+      <title>Matching Strings</title>
+      
+      <screen><![CDATA[
+word		     This will match the word "word"
+
+(word)               Allows you to match "word" as well but placing it
+                     in parens will allow you to reference it like
+                     this...
+
+(word)\1 	     Will match "wordword" so you could do this if you were matching html
+                     tags
+
+<(html)>.*</\1>      Will allow you to match the <html> and it's closing tag </html>.]]></screen>
+    </section>
+
+    <section>
+      <title>The Kleene Star or Wildcard * </title>
+      <para> 
+	The wildcard * means that the class will be repeated zero or more times.
+      </para>
+      <para>
+	The . stands for absolutely anything, once.
+      </para>
+
+      <screen>
+[a-z]*[0-9]+	     Zero or more a-z characters followed by one or more numbers.
+
+.*		     Meaning anything at all zero or more times.
+
+.at                  This will match hat, cat, bat, fat, etc.</screen>
+    </section>
+
+    <section>
+      <title>Searching At the Beginning or End of Strings</title>
+      <para>
+	A caret ^ means match this class at the beginning of my
+	string. The ^ must preceed your class.
+      </para>
+      
+      <para>
+	A dollar sign $ means match this class at the end of my string.
+	The $ must follow your class.      
+      </para>
+      
+      <screen>
+^[A-Z].*	    Caret means 'begins with' so... any upper case letter followed by
+                    anything zero or more times.
+
+.*;$		    Anything ending in a semicolon.</screen>
+    </section>
+
+    <section>
+      <title>Logical Expressions</title>
+      <para>
+	Placing a bar | in your expression will signify a logical OR.
+      </para>
+
+      <screen>
+([a-b]+|[0-1]+)     One or more a-b's OR one or more 1-0's.</screen>
+    </section>
+
+    <section>
+      <title>Practical Applications</title>
+      
+      <section>
+	<title>Matching an IP Address</title>
+
+	<para>
+	  This regular expression will match an IP Address.  It's not
+	  a valid IP Address but it looks like one, at least.
+	</para>
+	<screen>
+([0-9]{1,3}[.]){3}([0-9]{1,3})</screen>
+	<para>
+	  Curly braces signify the amount of times this class will
+	  occur. Also note that you have to wrap special character
+	  such as the period in braches [.] although you could also
+	  terminate them with a back-slash like, \:
+	</para>
+      </section>
+
+      <section>
+	<title>Matching a MAC Address</title>
+	<para>
+	  See if you can do this yourself, using the IP Address
+	  example. Valid MAC Addresses include:
+	</para>
+	<screen>
+C0:FF:EE:BA:BE:EE
+DE:AD:BE:EF:BA:BE</screen>
+      </section>
+
+      <section>
+	<title>sed: Stream Editor</title>
+	<para>
+	  sed stands for stream editor and allows you to apply regular
+	  expressions to files to make quick fixes.
+	</para>
+	
+	<screen><![CDATA[
+[23:36]abutcher@beta:~$ echo "biscuit mix" | sed 's/biscuit/beef/'
+beef mix
+
+[23:36]abutcher@beta:~$ echo "     <---- Notice the leading whitespace." | sed -r 's/^[ ]+//'
+<---- Notice the leading whitespace.
+
+abutcher@shell003:~$ echo "     <---- Notice the leading whitespace." > whitespace.txt
+
+abutcher@shell003:~$ cat whitespace.txt 
+     <---- Notice the leading whitespace.
+
+abutcher@shell003:~$ sed -r 's/^[ ]+//' whitespace.txt 
+<---- Notice the leading whitespace.
+
+abutcher@shell003:~$ sed -ri 's/^[ ]+//' whitespace.txt 
+
+abutcher@shell003:~$ cat whitespace.txt 
+<---- Notice the leading whitespace.
+]]></screen>
+	
+      </section>
+    </section>
+
+  </chapter>
+
+  <chapter>
+    <title>Regular Expressions in Java</title>  
+    
+    <section>
+      <title>RegexTest.java</title>
+      <programlisting>
+package edu.wvu.mix.abutcher;
+
+import java.io.IOException;
+import java.util.regex.Pattern;
+
+import jline.ConsoleReader;
+
+public class RegexTest {
+    public static void main(String[] args) throws IOException {
+
+        ConsoleReader reader = new ConsoleReader();
+
+        String line;
+        while ((line = reader.readLine("$> ")) != null) {
+
+            if (Pattern.matches(".*;$", line)) {
+                System.out.println("\'" + line + "\' ends in a semicolon.");
+            } 
+            if (Pattern.matches("([0-9]{1,3}[.]){3}([0-9]{1,3})", line)) {
+                System.out.println("\'" + line + "\' looks like an IP address.");
+            }
+            if (Pattern.matches("^[A-Z].*", line) ) {
+                System.out.println("\'" + line + "\' begins with a capital letter.");
+            }
+        }
+    }
+}</programlisting>
+    </section>
+    
+  </chapter>
+  
+  <!-- <xi:include href="a_file.xml"/> -->
+  
+  <!-- <index /> -->
+</book>
